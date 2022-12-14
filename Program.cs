@@ -1,8 +1,24 @@
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.EntityFrameworkCore;
+using TimeForARound;
+using TimeForARound.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    // RESTful URLs
+    options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
+});
+
+// SQLite database
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
