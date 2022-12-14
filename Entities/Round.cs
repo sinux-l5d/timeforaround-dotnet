@@ -6,7 +6,8 @@ public class Round
 {
     [Key] public Guid Id { get; set; }
     
-    [Required] public Guid UserId { get; set; }
+    public Guid UserId { get; set; }
+    public User? User { get; set; }
 
     [Required] public string Reason { get; set; } = string.Empty;
     [Required] public DateTime OccurredAt { get; set; }
