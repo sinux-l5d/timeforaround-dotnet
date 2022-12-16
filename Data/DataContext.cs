@@ -9,15 +9,13 @@ public class DataContext : DbContext
     {
     }
     
-    /*
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
             .HasMany(u => u.Rounds)
             .WithOne(r => r.User)
-            .HasForeignKey(r => r.UserId);
+            .HasForeignKey(r => r.Username);
     }
-    */
 
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Round> Rounds { get; set; } = null!;

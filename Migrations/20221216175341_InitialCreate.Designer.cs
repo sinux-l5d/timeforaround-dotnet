@@ -11,7 +11,7 @@ using TimeForARound.Data;
 namespace TimeForARound.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221216170739_InitialCreate")]
+    [Migration("20221216175341_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,30 +38,25 @@ namespace TimeForARound.Migrations
                     b.Property<DateTime>("ReportedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<string>("Username")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("Username");
 
                     b.ToTable("Rounds");
                 });
 
             modelBuilder.Entity("TimeForARound.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("Username")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("JoinDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
+                    b.HasKey("Username");
 
                     b.ToTable("Users");
                 });
@@ -70,9 +65,7 @@ namespace TimeForARound.Migrations
                 {
                     b.HasOne("TimeForARound.Entities.User", "User")
                         .WithMany("Rounds")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Username");
 
                     b.Navigation("User");
                 });

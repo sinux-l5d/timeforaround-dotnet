@@ -1,12 +1,14 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TimeForARound.Entities;
 
 public class Round
 {
-    [Key] public Guid Id { get; set; }
+    [Key]
+    public Guid Id { get; set; }
     
-    public Guid UserId { get; set; }
+    public string? Username { get; set; }
     public User? User { get; set; }
 
     [Required] public string Reason { get; set; } = string.Empty;
