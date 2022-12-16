@@ -15,7 +15,6 @@ namespace TimeForARound.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
                     JoinDate = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>

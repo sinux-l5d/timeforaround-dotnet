@@ -55,10 +55,6 @@ namespace TimeForARound.Migrations
                     b.Property<DateTime>("JoinDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT");

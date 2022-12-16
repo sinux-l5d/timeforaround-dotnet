@@ -11,7 +11,7 @@ using TimeForARound.Data;
 namespace TimeForARound.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221214211611_InitialCreate")]
+    [Migration("20221216170739_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,10 +55,6 @@ namespace TimeForARound.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("JoinDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
