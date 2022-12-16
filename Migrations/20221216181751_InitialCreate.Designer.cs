@@ -11,7 +11,7 @@ using TimeForARound.Data;
 namespace TimeForARound.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221216175341_InitialCreate")]
+    [Migration("20221216181751_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
