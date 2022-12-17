@@ -13,6 +13,7 @@ public class RoundProfile : Profile
 
         // Client to server
         CreateMap<RoundNewDto, Round>()
-            .ForMember(dest => dest.ReportedAt, opt => opt.MapFrom(src => DateTime.Now));
+            .ForMember(dest => dest.ReportedAt, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.AsBeenPaid, opt => opt.MapFrom(src => false));
     }
 }

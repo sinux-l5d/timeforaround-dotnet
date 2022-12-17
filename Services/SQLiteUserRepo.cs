@@ -19,7 +19,10 @@ public class SQLiteUserRepo : IUserRepo
 
     public User? GetUser(string? username)
     {
-        return _context.Users.FirstOrDefault(u => u.Username == username);
+        if (username == null) return null;
+        return _context.Users
+            .Include(u => u.Rounds)
+            .FirstOrDefault(u => u.Username == username);
     }
 
     public User AddUser(User user)
@@ -30,5 +33,29 @@ public class SQLiteUserRepo : IUserRepo
         var userDb = _context.Users.Add(user);
         _context.SaveChanges();
         return userDb.Entity;
+    }
+
+    public Round AddRound(Round round)
+    {
+        var username = round.Username;
+        
+        if (!_context.Users.Any(u => u.Username == username))
+            throw new Exception("User does not exist");
+        
+        round.Id = Guid.NewGuid(); 
+        var roundDb = _context.Rounds.Add(round);
+        _context.SaveChanges();
+        
+        return roundDb.Entity;
+    }
+    
+    public Round SetPaid(Guid roundId, bool paid)
+    {
+        var round = _context.Rounds.FirstOrDefault(r => r.Id == roundId);
+        if (round == null)
+            throw new Exception("Round does not exist");
+        round.AsBeenPaid = paid;
+        _context.SaveChanges();
+        return round;
     }
 }

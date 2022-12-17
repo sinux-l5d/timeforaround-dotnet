@@ -8,7 +8,5 @@ public class RoundNewDto
     public string? Reason { get; set; }
     
     [Required]
-    public DateTime OccuredAt { get; set; }
-
-    public bool AsBeenPaid { get; set; } = false;
+    public DateTime OccurredAt { get; set; }
 }
