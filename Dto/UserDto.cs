@@ -3,5 +3,6 @@ namespace TimeForARound.Dto;
 public class UserDto
 {
     public string Username { get; set; } = string.Empty;
-    public IList<RoundDto>? Rounds { get; set; }
+    public int RoundsCount { get; set; }
+    public int RoundsPaid { get; set; }
 }

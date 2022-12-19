@@ -1,4 +1,3 @@
-using System.Globalization;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using TimeForARound.Dto;
@@ -11,13 +10,11 @@ namespace TimeForARound.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly ILogger<UsersController> _logger;
     private readonly IUserRepo _userRepo;
     private readonly IMapper _mapper;
 
-    public UsersController(ILogger<UsersController> logger, IMapper mapper, IUserRepo userRepo)
+    public UsersController(IMapper mapper, IUserRepo userRepo)
     {
-        _logger = logger;
         _userRepo = userRepo;
         _mapper = mapper;
     }
@@ -30,14 +27,14 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet("{username}")]
-    public ActionResult<UserDto> GetUserByName(string username)
+    public ActionResult<UserDetailedDto> GetUserByName(string username)
     {
         var user = _userRepo.GetUser(username);
         if (user == null)
         {
             return NotFound(new { error = $"User \"{username}\" not found" });
         }
-        return Ok(_mapper.Map<UserDto>(user));
+        return Ok(_mapper.Map<UserDetailedDto>(user));
     }
 
     [HttpPost]
