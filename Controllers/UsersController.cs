@@ -103,10 +103,4 @@ public class UsersController : ControllerBase
         return NoContent();
     }
     
-    [HttpGet("/rounds")]
-    public ActionResult<IEnumerable<RoundAloneDto>> GetAllRounds()
-    {
-        var rounds = _userRepo.GetAllRounds();
-        return Ok(_mapper.Map<IEnumerable<RoundAloneDto>>(rounds));
-    }
 }
