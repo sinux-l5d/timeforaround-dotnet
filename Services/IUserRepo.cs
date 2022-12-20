@@ -10,7 +10,8 @@ public interface IUserRepo
     public User? GetUser(string? username);
     
     public User AddUser(User user);
-    
+
+    public IList<Round> GetAllRounds();
     public Round AddRound(Round round);
     public Round SetPaid(Guid roundId, bool paid);
 }

@@ -102,4 +102,11 @@ public class UsersController : ControllerBase
         _userRepo.SetPaid(roundDb.Id, roundUpdateDto.AsBeenPaid);
         return NoContent();
     }
+    
+    [HttpGet("/rounds")]
+    public ActionResult<IEnumerable<RoundAloneDto>> GetAllRounds()
+    {
+        var rounds = _userRepo.GetAllRounds();
+        return Ok(_mapper.Map<IEnumerable<RoundAloneDto>>(rounds));
+    }
 }

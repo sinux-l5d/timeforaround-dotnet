@@ -10,6 +10,7 @@ public class RoundProfile : Profile
     {
         // Server to client
         CreateMap<Round, RoundDto>();
+        CreateMap<Round, RoundAloneDto>();
 
         // Client to server
         CreateMap<RoundNewDto, Round>()

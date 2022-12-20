@@ -35,6 +35,11 @@ public class SQLiteUserRepo : IUserRepo
         return userDb.Entity;
     }
 
+    public IList<Round> GetAllRounds()
+    {
+        return _context.Rounds.ToList();
+    }
+
     public Round AddRound(Round round)
     {
         var username = round.Username;
