@@ -1,0 +1,189 @@
+Parameters:
+
+  LatestLinuxImageId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  
+  BaseName:
+    Type: String
+    Default: "SOA_CA3"
+    Description: "Base name for all resources"
+  
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: "Name of an existing EC2 KeyPair to enable SSH access to the instances"
+    
+  ImageOrUrl:
+    Type: String
+    Description: Name of the docker image to use or URL
+    Default: "ghcr.io/sinux-l5d/timeforaround-dotnet:latest"
+  
+  ContainerInternalHttpPort:
+    Type: Number
+    Description: Port number for the container to listen on for HTTP traffic
+    Default: 80
+  
+  Domain:
+    Type: String
+    Description: Domain name for the application that will point to the IP address
+
+Resources:
+  
+  Vpc:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: !Sub ${BaseName}_VPC
+
+  Gateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${BaseName}_GATEWAY
+
+  GatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref Gateway
+      VpcId: !Ref Vpc
+
+  RouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${BaseName}_ROUTE_TABLE
+  
+  Route:
+    Type: 'AWS::EC2::Route'
+    DependsOn: Gateway
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref Gateway
+  
+  Subnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${BaseName}_SUBNET_1
+
+  SubnetRouteTableAttachment:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref Subnet
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref Vpc
+      GroupDescription: allow connections from specified source security group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      SubnetId: !Ref Subnet
+      ImageId: !Ref LatestLinuxImageId
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      KeyName: !Ref KeyName
+      UserData: 
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          
+          LOG_FILE=/home/ec2-user/userdata.log
+          
+          echo "Starting user data script" > ${!LOG_FILE}
+          
+          yum -y update
+          echo "Yum update completed" >> ${!LOG_FILE}
+          
+          yum -y install docker
+          echo "Yum install docker completed" >> ${!LOG_FILE}
+          
+          usermod -a -G docker ec2-user
+          echo "Added ec2-user to docker group" >> ${!LOG_FILE}
+          
+          systemctl enable --now docker
+          echo "Docker service enabled and started" >> ${!LOG_FILE}
+          
+          docker pull ${ImageOrUrl}
+          echo "Docker pull completed" >> ${!LOG_FILE}
+          
+          docker run -d -p 8080:${ContainerInternalHttpPort} --name ${BaseName} ${ImageOrUrl}
+          echo "Docker run completed" >> ${!LOG_FILE}
+          
+          yum -y install yum-plugin-copr
+          echo "Yum install copr completed" >> ${!LOG_FILE}
+          
+          yum -y copr enable @caddy/caddy epel-7-$(arch)
+          echo "Yum copr enable completed" >> ${!LOG_FILE}
+          
+          yum -y install caddy
+          echo "Yum install caddy completed" >> ${!LOG_FILE}
+          
+          tee /etc/caddy/Caddyfile > /dev/null <<EOT
+          (security) {
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Xss-Protection "1; mode=block"
+              X-Content-Type-Options "nosniff"
+              Content-Security-Policy "upgrade-insecure-requests"
+            }
+          }
+          http://${Domain} {
+            redir https://{host}{uri}
+            import security
+          }
+          https://${Domain} {
+            reverse_proxy localhost:8080
+            import security
+          }
+          EOT
+          echo "Caddyfile created" >> ${!LOG_FILE}
+          
+          systemctl enable --now caddy
+          echo "Caddy service enabled and started" >> ${!LOG_FILE}
+          
+Outputs:
+
+  VpcId:
+    Value: !Ref Vpc
+    Description: VPC ID
+
+  AZ:
+    Value: !GetAtt
+      - Subnet
+      - AvailabilityZone
+    Description: Subnet AZ
+
+  SubnetId:
+    Value: !Ref Subnet
+    Description: Subnet ID
+
+  PublicIp:
+    Value: !GetAtt Instance.PublicIp
+    Description: Instance Public Ip
